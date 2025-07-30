@@ -62,7 +62,10 @@ export 'package:flutter/painting.dart'
 /// See also:
 ///
 ///  * [ImageProvider], which has an example showing how this might be used.
-ImageConfiguration createLocalImageConfiguration(BuildContext context, {Size? size}) {
+ImageConfiguration createLocalImageConfiguration(
+  BuildContext context, {
+  Size? size,
+}) {
   return ImageConfiguration(
     bundle: DefaultAssetBundle.of(context),
     devicePixelRatio: MediaQuery.maybeDevicePixelRatioOf(context) ?? 1.0,
@@ -122,7 +125,10 @@ Future<void> precacheImage(
   Size? size,
   ImageErrorListener? onError,
 }) {
-  final ImageConfiguration config = createLocalImageConfiguration(context, size: size);
+  final ImageConfiguration config = createLocalImageConfiguration(
+    context,
+    size: size,
+  );
   final Completer<void> completer = Completer<void>();
   final ImageStream stream = provider.resolve(config);
   ImageStreamListener? listener;
@@ -193,7 +199,12 @@ Future<void> precacheImage(
 ///  * [Image.frameBuilder], which makes use of this signature in the [Image]
 ///    widget.
 typedef ImageFrameBuilder =
-    Widget Function(BuildContext context, Widget child, int? frame, bool wasSynchronouslyLoaded);
+    Widget Function(
+      BuildContext context,
+      Widget child,
+      int? frame,
+      bool wasSynchronouslyLoaded,
+    );
 
 /// Signature used by [Image.loadingBuilder] to build a representation of the
 /// image's loading progress.
@@ -227,7 +238,11 @@ typedef ImageFrameBuilder =
 ///  * [ImageChunkListener], a lower-level signature for listening to raw
 ///    [ImageChunkEvent]s.
 typedef ImageLoadingBuilder =
-    Widget Function(BuildContext context, Widget child, ImageChunkEvent? loadingProgress);
+    Widget Function(
+      BuildContext context,
+      Widget child,
+      ImageChunkEvent? loadingProgress,
+    );
 
 /// Signature used by [Image.errorBuilder] to create a replacement widget to
 /// render instead of the image.
@@ -446,7 +461,8 @@ class Image extends StatefulWidget {
     Map<String, String>? headers,
     int? cacheWidth,
     int? cacheHeight,
-    WebHtmlElementStrategy webHtmlElementStrategy = WebHtmlElementStrategy.never,
+    WebHtmlElementStrategy webHtmlElementStrategy =
+        WebHtmlElementStrategy.never,
   }) : image = ResizeImage.resizeIfNeeded(
          cacheWidth,
          cacheHeight,
@@ -521,7 +537,11 @@ class Image extends StatefulWidget {
          'Image.file is not supported on Flutter Web. '
          'Consider using either Image.asset or Image.network instead.',
        ),
-       image = ResizeImage.resizeIfNeeded(cacheWidth, cacheHeight, FileImage(file, scale: scale)),
+       image = ResizeImage.resizeIfNeeded(
+         cacheWidth,
+         cacheHeight,
+         FileImage(file, scale: scale),
+       ),
        loadingBuilder = null,
        assert(cacheWidth == null || cacheWidth > 0),
        assert(cacheHeight == null || cacheHeight > 0);
@@ -682,7 +702,12 @@ class Image extends StatefulWidget {
          cacheWidth,
          cacheHeight,
          scale != null
-             ? ExactAssetImage(name, bundle: bundle, scale: scale, package: package)
+             ? ExactAssetImage(
+               name,
+               bundle: bundle,
+               scale: scale,
+               package: package,
+             )
              : AssetImage(name, bundle: bundle, package: package),
        ),
        loadingBuilder = null,
@@ -1060,23 +1085,60 @@ class Image extends StatefulWidget {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<ImageProvider>('image', image));
     properties.add(DiagnosticsProperty<Function>('frameBuilder', frameBuilder));
-    properties.add(DiagnosticsProperty<Function>('loadingBuilder', loadingBuilder));
+    properties.add(
+      DiagnosticsProperty<Function>('loadingBuilder', loadingBuilder),
+    );
     properties.add(DoubleProperty('width', width, defaultValue: null));
     properties.add(DoubleProperty('height', height, defaultValue: null));
     properties.add(ColorProperty('color', color, defaultValue: null));
-    properties.add(DiagnosticsProperty<Animation<double>?>('opacity', opacity, defaultValue: null));
-    properties.add(EnumProperty<BlendMode>('colorBlendMode', colorBlendMode, defaultValue: null));
+    properties.add(
+      DiagnosticsProperty<Animation<double>?>(
+        'opacity',
+        opacity,
+        defaultValue: null,
+      ),
+    );
+    properties.add(
+      EnumProperty<BlendMode>(
+        'colorBlendMode',
+        colorBlendMode,
+        defaultValue: null,
+      ),
+    );
     properties.add(EnumProperty<BoxFit>('fit', fit, defaultValue: null));
     properties.add(
-      DiagnosticsProperty<AlignmentGeometry>('alignment', alignment, defaultValue: null),
+      DiagnosticsProperty<AlignmentGeometry>(
+        'alignment',
+        alignment,
+        defaultValue: null,
+      ),
     );
-    properties.add(EnumProperty<ImageRepeat>('repeat', repeat, defaultValue: ImageRepeat.noRepeat));
-    properties.add(DiagnosticsProperty<Rect>('centerSlice', centerSlice, defaultValue: null));
     properties.add(
-      FlagProperty('matchTextDirection', value: matchTextDirection, ifTrue: 'match text direction'),
+      EnumProperty<ImageRepeat>(
+        'repeat',
+        repeat,
+        defaultValue: ImageRepeat.noRepeat,
+      ),
     );
-    properties.add(StringProperty('semanticLabel', semanticLabel, defaultValue: null));
-    properties.add(DiagnosticsProperty<bool>('this.excludeFromSemantics', excludeFromSemantics));
+    properties.add(
+      DiagnosticsProperty<Rect>('centerSlice', centerSlice, defaultValue: null),
+    );
+    properties.add(
+      FlagProperty(
+        'matchTextDirection',
+        value: matchTextDirection,
+        ifTrue: 'match text direction',
+      ),
+    );
+    properties.add(
+      StringProperty('semanticLabel', semanticLabel, defaultValue: null),
+    );
+    properties.add(
+      DiagnosticsProperty<bool>(
+        'this.excludeFromSemantics',
+        excludeFromSemantics,
+      ),
+    );
     properties.add(EnumProperty<FilterQuality>('filterQuality', filterQuality));
   }
 }
@@ -1289,7 +1351,9 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
       return;
     }
 
-    if (keepStreamAlive && _completerHandle == null && _imageStream?.completer != null) {
+    if (keepStreamAlive &&
+        _completerHandle == null &&
+        _imageStream?.completer != null) {
       _completerHandle = _imageStream!.completer!.keepAlive();
     }
 
@@ -1309,7 +1373,9 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
               '$error',
               textAlign: TextAlign.center,
               textDirection: TextDirection.ltr,
-              style: const TextStyle(shadows: <Shadow>[Shadow(blurRadius: 1.0)]),
+              style: const TextStyle(
+                shadows: <Shadow>[Shadow(blurRadius: 1.0)],
+              ),
             ),
           ),
         ),
@@ -1378,7 +1444,12 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
     }
 
     if (widget.frameBuilder != null) {
-      result = widget.frameBuilder!(context, result, _frameNumber, _wasSynchronouslyLoaded);
+      result = widget.frameBuilder!(
+        context,
+        result,
+        _frameNumber,
+        _wasSynchronouslyLoaded,
+      );
     }
 
     if (widget.loadingBuilder != null) {
@@ -1393,8 +1464,15 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
     super.debugFillProperties(description);
     description.add(DiagnosticsProperty<ImageStream>('stream', _imageStream));
     description.add(DiagnosticsProperty<ImageInfo>('pixels', _imageInfo));
-    description.add(DiagnosticsProperty<ImageChunkEvent>('loadingProgress', _loadingProgress));
+    description.add(
+      DiagnosticsProperty<ImageChunkEvent>('loadingProgress', _loadingProgress),
+    );
     description.add(DiagnosticsProperty<int>('frameNumber', _frameNumber));
-    description.add(DiagnosticsProperty<bool>('wasSynchronouslyLoaded', _wasSynchronouslyLoaded));
+    description.add(
+      DiagnosticsProperty<bool>(
+        'wasSynchronouslyLoaded',
+        _wasSynchronouslyLoaded,
+      ),
+    );
   }
 }
